@@ -1,0 +1,20 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "manage.py",
+        "use": "@vercel/python"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "manage.py"
+      }
+    ],
+    "env": {
+      "DJANGO_SECRET_KEY": "",
+      "GOOGLE_GENAI_API_KEY": "AIzaSyDVq-g2PRh94HK11l2SzBT7dvwy6j0TrPs"
+    }
+  }
+  
