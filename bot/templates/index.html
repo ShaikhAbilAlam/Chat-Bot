@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ece5dd;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 600px;
+            height: 90%;
+            display: flex;
+            flex-direction: column;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Chat Header */
+        .chat-header {
+            background-color: #075e54;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Chat Messages Area */
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #ece5dd;
+        }
+
+        .message {
+            margin: 10px 0;
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 8px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background-color: #dcf8c6;
+            align-self: flex-end;
+        }
+
+        .message.bot {
+            background-color: #ffffff;
+            align-self: flex-start;
+            border: 1px solid #ddd;
+        }
+
+        .bot-message-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .speaker-button {
+            background: none;
+            border: none;
+            color: #128c7e;
+            font-size: 16px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .speaker-button:hover {
+            color: #075e54;
+        }
+
+        /* Input Area */
+        .chat-input {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #ffffff;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input textarea {
+            flex: 1;
+            height: 40px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            resize: none;
+            outline: none;
+        }
+
+        .chat-input button {
+            background-color:  #075e54;
+            border: none;
+            color: white;
+            font-size: 16px;
+            margin-left: 10px;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .chat-input button:hover {
+            background-color: #1ebe59;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">AI Chatbot</div>
+
+        <!-- Messages -->
+        <div id="chat-messages" class="chat-messages">
+            <!-- Example Messages -->
+            <div class="message bot">
+                <div class="bot-message-content">
+                    <span>Hello! How can I assist you today?</span>
+                    <button class="speaker-button" onclick="speakText('Hello! How can I assist you today?')">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="chat-input">
+            <textarea id="user-input" placeholder="Type a message..."></textarea>
+            <button onclick="sendPrompt()">➤</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendPrompt() {
+            const prompt = document.getElementById("user-input").value.trim();
+            const chatMessages = document.getElementById("chat-messages");
+
+            if (prompt === "") return;
+
+            // Display user message
+            const userMessage = document.createElement("div");
+            userMessage.className = "message user";
+            userMessage.innerText = prompt;
+            chatMessages.appendChild(userMessage);
+            document.getElementById("user-input").value = "";
+
+            // Auto-scroll to the bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Display bot response placeholder
+            const botMessage = document.createElement("div");
+            botMessage.className = "message bot";
+            const botMessageContent = document.createElement("div");
+            botMessageContent.className = "bot-message-content";
+            botMessage.appendChild(botMessageContent);
+
+            const botText = document.createElement("span");
+            botText.innerText = "Generating response...";
+            botMessageContent.appendChild(botText);
+
+            const speakerButton = document.createElement("button");
+            speakerButton.className = "speaker-button";
+            speakerButton.innerText = "🔊";
+            speakerButton.disabled = true;
+            botMessageContent.appendChild(speakerButton);
+
+            chatMessages.appendChild(botMessage);
+
+            // Send the prompt to the backend
+            try {
+                const response = await fetch("/generate/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const botResponse = data.response || "An error occurred.";
+
+                // Update bot message and enable speaker button
+                botText.innerText = botResponse;
+                speakerButton.disabled = false;
+                speakerButton.onclick = () => speakText(botResponse);
+            } catch (error) {
+                botText.innerText = "Error: " + error.message;
+                speakerButton.disabled = true;
+            }
+
+            // Auto-scroll to the bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function speakText(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>
