@@ -2,14 +2,14 @@
     "version": 2,
     "builds": [
       {
-        "src": "manage.py",
+        "src": "my_bot/wsgi.py",
         "use": "@vercel/python"
       }
     ],
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "manage.py"
+        "dest": "my_bot/wsgi.py"
       }
     ],
     "env": {
