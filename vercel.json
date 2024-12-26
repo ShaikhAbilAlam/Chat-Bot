@@ -1,9 +1,9 @@
 {
   "version": 2,
   "builds": [
-    { "src": "yourproject/wsgi.py", "use": "@vercel/python" }
+    { "src": "/my_bot/wsgi.py", "use": "@vercel/python" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "yourproject/wsgi.py" }
+    { "src": "/(.*)", "dest": "/my_bot/wsgi.py" }
   ]
 }
